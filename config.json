@@ -17,12 +17,15 @@
     "defaultLocation": "Lewisville, TX"
   },
   "images": {
-    "Torah Studies": "",
-    "Bagels, Lox": "",
-    "First Fridays": "",
-    "Torah & Tea": "",
-    "Kid Shabbat": "",
-    "Kids Shabbat": "",
-    "Minyan": ""
+    "Bagels, Lox": "img/blt.jpg",
+    "BLT": "img/blt.jpg",
+    "Torah Studies": "img/torah-studies.jpg",
+    "Torah & Tea": "img/torah-and-tea.jpg",
+    "First Fridays": "img/first-fridays.jpg",
+    "Kid Shabbat": "img/kid-shabbat.jpg",
+    "Kids Shabbat": "img/kid-shabbat.jpg",
+    "Minyan": "img/minyan-kiddush.jpg",
+    "Community Menorah": "img/community-menorah.jpg",
+    "Challah Bake": "img/challah-bake.jpg"
   }
 }
