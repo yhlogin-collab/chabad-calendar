@@ -1,0 +1,14 @@
+{
+  "name": "chabad-calendar",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "node scripts/build.mjs"
+  },
+  "dependencies": {
+    "@hebcal/core": "^6.16.1",
+    "ical.js": "^2.2.1"
+  },
+  "type": "module",
+  "private": "true"
+}

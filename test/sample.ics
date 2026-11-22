@@ -1,0 +1,93 @@
+BEGIN:VCALENDAR
+PRODID:-//Google Inc//Google Calendar 70.9054//EN
+VERSION:2.0
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Chabad Events
+X-WR-TIMEZONE:America/Chicago
+BEGIN:VTIMEZONE
+TZID:America/Chicago
+X-LIC-LOCATION:America/Chicago
+BEGIN:DAYLIGHT
+TZOFFSETFROM:-0600
+TZOFFSETTO:-0500
+TZNAME:CDT
+DTSTART:19700308T020000
+RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=2SU
+END:DAYLIGHT
+BEGIN:STANDARD
+TZOFFSETFROM:-0500
+TZOFFSETTO:-0600
+TZNAME:CST
+DTSTART:19701101T020000
+RRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=1SU
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+DTSTART;TZID=America/Chicago:20261007T193000
+DTEND;TZID=America/Chicago:20261007T203000
+RRULE:FREQ=WEEKLY;BYDAY=WE
+EXDATE;TZID=America/Chicago:20261216T193000
+UID:torah-studies@google.com
+SUMMARY:Torah Studies
+DESCRIPTION:Join Rabbi Horowitz for weekly Torah learning as we delve into
+ Jewish History\, Law and traditions. Wednesdays at 7:30pm. Email info@Jewis
+ hCarrollton.org to RSVP and for class location
+ATTACH;FILENAME=Torah Studies.png;FMTTYPE=image/png:https://drive.google.co
+ m/open?id=1AbCdEfGhIjKlMnOpQrStUvWxYz
+LOCATION:
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/Chicago:20261223T200000
+DTEND;TZID=America/Chicago:20261223T210000
+RECURRENCE-ID;TZID=America/Chicago:20261223T193000
+UID:torah-studies@google.com
+SUMMARY:Torah Studies (Chanukah edition – late start)
+DESCRIPTION:Special Chanukah class with latkes!
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/Chicago:20261204T183000
+DTEND;TZID=America/Chicago:20261204T210000
+RRULE:FREQ=MONTHLY;BYDAY=1FR
+UID:first-fridays@google.com
+SUMMARY:First Fridays
+DESCRIPTION:Join us on the first Friday of each month for joyful Friday nigh
+ t services\, followed by a delicious Shabbat dinner. Services and dinner wil
+ l be held at the Horowitz home. <br><br>Please <a href="https://www.jewishcar
+ rollton.org/templates/articlecco_cdo/aid/1234/jewish/RSVP.htm">RSVP here</a>
+LOCATION:Horowitz home\, Lewisville TX
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20261209
+DTEND;VALUE=DATE:20261210
+UID:menorah@google.com
+SUMMARY:Community Menorah at the Village Shops
+LOCATION:The Village Shops\, Lewisville TX
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/Chicago:20261213T093000
+DTEND;TZID=America/Chicago:20261213T110000
+RRULE:FREQ=MONTHLY;BYDAY=2SU
+UID:blt@google.com
+SUMMARY:Bagels\, Lox\, & Teffilin
+DESCRIPTION:Men! Join us each month for Teffilin\, a little prayer and a bag
+ el & lox breakfast. Tefillin Club is in loving memory of Dovid Horowitz לע״נ
+  דוד חיים בן ירחמיאל מנחם מענדל
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20261125T013000Z
+DTEND:20261125T023000Z
+UID:single-utc@google.com
+SUMMARY:Kids in the Kitchen
+DESCRIPTION:Challah baking for kids ages 4-10.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/Chicago:20261129T150000
+DTEND;TZID=America/Chicago:20261129T160000
+UID:cancelled@google.com
+SUMMARY:Cancelled thing
+STATUS:CANCELLED
+END:VEVENT
+END:VCALENDAR

@@ -1,0 +1,14 @@
+{
+  "calendarId": "c_98fc9fb2a617c70b49b0855b339b48fed01f593a210e6ea4efed8971d8021bc3@group.calendar.google.com",
+  "timezone": "America/Chicago",
+  "daysBack": 62,
+  "daysAhead": 400,
+  "location": { "name": "Lewisville, TX", "latitude": 33.0462, "longitude": -96.9942, "elevation": 0 },
+  "candleLightingMins": 18,
+  "havdalahMins": 0,
+  "site": {
+    "name": "Chabad of Carrollton-Lewisville",
+    "email": "info@JewishCarrollton.org",
+    "defaultLocation": "Lewisville, TX"
+  }
+}
