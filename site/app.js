@@ -33,7 +33,7 @@
       return t;
     }
     t += ` ${time(e.start)}`;
-    if (e.end) t += (e.endDate !== e.date ? ` – ${dayLabel(e.endDate)} ` : ' - ') + time(e.end);
+    if (e.end && e.end !== e.start) t += (e.endDate !== e.date ? ` – ${dayLabel(e.endDate)} ` : ' - ') + time(e.end);
     return t;
   }
 
@@ -221,7 +221,8 @@
   function openEvent(id) {
     const e = evById[id];
     if (!e) return;
-    const where = e.location ? `<div class="where">📍 <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(e.location)}" target="_blank" rel="noopener">${esc(e.location)}</a></div>` : '';
+    const isAddress = e.location && /\d/.test(e.location) && !/rsvp/i.test(e.location);
+    const where = e.location && !isAddress ? `<div class="where">📍 ${esc(e.location)}</div>` : e.location ? `<div class="where">📍 <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(e.location)}" target="_blank" rel="noopener">${esc(e.location)}</a></div>` : '';
     const files = (e.files || []).length ? `<div class="files">📎 ${e.files.map(f => `<a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.name)}</a>`).join(' · ')}</div>` : '';
     $('#mBody').innerHTML = `
       ${e.image ? `<img class="hero" src="${esc(e.image.replace(/sz=w\d+/, 'sz=w1200'))}" alt="" onerror="this.remove()">` : ''}

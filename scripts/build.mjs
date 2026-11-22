@@ -108,6 +108,13 @@ function attachments(comp) {
   return out;
 }
 
+// Default flyer per event series, from config.images: { "Torah Studies": "img/torah-studies.jpg" }
+function seriesImage(title) {
+  const t = title.toLowerCase();
+  for (const [key, img] of Object.entries(config.images || {})) if (img && t.startsWith(key.toLowerCase())) return img;
+  return null;
+}
+
 // RSVP / registration link: first link whose text or URL looks like signup, else none.
 function findRsvp(desc) {
   const re = /\[\[([^|\]]*)\|([^\]]+)\]\]/g;
@@ -135,7 +142,7 @@ function buildEvents(icsText, from, to) {
   const out = [];
   const push = (comp, start, end, uid) => {
     if ((comp.getFirstPropertyValue('status') || '').toUpperCase() === 'CANCELLED') return;
-    const title = comp.getFirstPropertyValue('summary') || 'Event';
+    const title = (comp.getFirstPropertyValue('summary') || 'Event').trim();
     const desc = cleanDescription(comp.getFirstPropertyValue('description') || '');
     const s = convert(start), e = end ? convert(end) : null;
     const att = attachments(comp);
@@ -148,9 +155,9 @@ function buildEvents(icsText, from, to) {
       // all-day DTEND is exclusive in iCal; store the inclusive last day
       endDate: s.allDay && e ? prevDay(e.date) : (e ? e.date : s.date),
       end: e && e.iso ? e.iso : null,
-      location: comp.getFirstPropertyValue('location') || '',
+      location: (comp.getFirstPropertyValue('location') || '').trim(),
       description: desc,
-      image: att.image,
+      image: att.image || seriesImage(title),
       files: att.files,
       rsvp: findRsvp(desc),
     });
