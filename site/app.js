@@ -148,6 +148,16 @@
     $('.next').style.visibility = $('.next').disabled ? 'hidden' : '';
   }
 
+  // RSVP: a registration link from the description, or (when the location says "RSVP…") an email to the office
+  const rsvpLoc = (e) => /rsvp/i.test(e.location || '');
+  const mailRsvp = (e) => `mailto:${(DATA.site && DATA.site.email) || ''}?subject=${encodeURIComponent(`RSVP: ${e.title} – ${dayLabel(e.date)}`)}` +
+    `&body=${encodeURIComponent(`Hi! I'd like to RSVP for ${e.title} on ${whenText(e)}. Please send me the location.\n\nName:\nNumber of people:\n`)}`;
+  function rsvpButton(e, cls = 'chip solid') {
+    if (e.rsvp) return `<a class="${cls}" href="${esc(e.rsvp)}" target="_blank" rel="noopener">RSVP</a>`;
+    if (rsvpLoc(e)) return `<a class="${cls}" href="${esc(mailRsvp(e))}">✉️ RSVP for location</a>`;
+    return '';
+  }
+
   // ---------- render: list ----------
   function evHtml(e) {
     const d = dateObj(e.date);
@@ -158,9 +168,9 @@
       ${media}
       <div><h3>${esc(e.title)}</h3>
       <div class="when">${esc(whenText(e))}<span class="heb" dir="rtl">${esc(heb(e.date))}</span></div>
-      ${e.location ? `<div class="where">📍 ${esc(e.location)}</div>` : ''}
+      ${e.location && !rsvpLoc(e) ? `<div class="where">📍 ${esc(e.location)}</div>` : ''}
       ${e.description ? `<div class="desc">${esc(plain(e.description))}</div>` : ''}
-      ${e.rsvp ? `<div class="chips"><a class="chip solid" href="${esc(e.rsvp)}" target="_blank" rel="noopener">RSVP</a></div>` : ''}
+      ${rsvpButton(e) ? `<div class="chips">${rsvpButton(e)}</div>` : ''}
       </div></article>`;
     void d;
   }
@@ -222,7 +232,7 @@
     const e = evById[id];
     if (!e) return;
     const isAddress = e.location && /\d/.test(e.location) && !/rsvp/i.test(e.location);
-    const where = e.location && !isAddress ? `<div class="where">📍 ${esc(e.location)}</div>` : e.location ? `<div class="where">📍 <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(e.location)}" target="_blank" rel="noopener">${esc(e.location)}</a></div>` : '';
+    const where = rsvpLoc(e) ? '' : e.location && !isAddress ? `<div class="where">📍 ${esc(e.location)}</div>` : e.location ? `<div class="where">📍 <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(e.location)}" target="_blank" rel="noopener">${esc(e.location)}</a></div>` : '';
     const files = (e.files || []).length ? `<div class="files">📎 ${e.files.map(f => `<a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.name)}</a>`).join(' · ')}</div>` : '';
     $('#mBody').innerHTML = `
       ${e.image ? `<img class="hero" src="${esc(e.image.replace(/sz=w\d+/, 'sz=w1200'))}" alt="" onerror="this.remove()">` : ''}
@@ -234,7 +244,7 @@
         ${where}
         ${e.description ? `<div class="body">${richText(e.description)}</div>` : '<div style="height:14px"></div>'}
         <div class="actions">
-          ${e.rsvp ? `<a class="chip solid" href="${esc(e.rsvp)}" target="_blank" rel="noopener">RSVP</a>` : ''}
+          ${rsvpButton(e)}
           <a class="chip" href="${esc(googleLink(e))}" target="_blank" rel="noopener">+ Google Calendar</a>
           <button type="button" class="chip" data-act="ics">+ Apple / Outlook</button>
           <a class="chip" href="${esc(waLink(e))}" target="_blank" rel="noopener">Share on WhatsApp</a>
