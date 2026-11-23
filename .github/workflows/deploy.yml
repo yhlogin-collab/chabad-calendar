@@ -2,7 +2,7 @@ name: Update calendar
 
 on:
   schedule:
-    - cron: '*/15 * * * *'   # every 15 minutes (GitHub may run it a few minutes late)
+    - cron: '17 */6 * * *'    # every 6 hours (GitHub may run it late); use "Run workflow" for an instant refresh
   push:
     branches: [main]
   workflow_dispatch:          # "Run workflow" button for an instant refresh

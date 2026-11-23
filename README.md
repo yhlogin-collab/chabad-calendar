@@ -1,6 +1,6 @@
 # Chabad of Carrollton-Lewisville – Events Calendar
 
-Replaces Tockify. Reads the "Chabad Events" Google Calendar every 15 minutes and publishes
+Replaces Tockify. Reads the "Chabad Events" Google Calendar every 6 hours (or on demand) and publishes
 a calendar page (GitHub Pages) that is embedded on jewishcarrollton.org.
 
 **You keep adding events in Google Calendar exactly as before.**
