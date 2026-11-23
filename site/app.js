@@ -1,6 +1,7 @@
 (() => {
   'use strict';
-  const PAGE = 12;                         // events per "page" in the list
+  const PAGE = 12;                        // events per "page" in the list
+  const SHOW_ZMAN_ROWS = false;           // Shabbos/Chanukah strips between events in the list
   const $ = (s) => document.querySelector(s);
   const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   const MON = MONTHS.map(m => m.slice(0, 3));
@@ -197,7 +198,7 @@
     const shownEvs = evs.slice(0, state.shown);
     const limit = state.sel ? to : (shownEvs.length < evs.length ? shownEvs[shownEvs.length - 1].date : to);
     items = shownEvs.map(e => ({ kind: 'e', e, date: e.date, sort: e.start ? localSort(e.start) : e.date + 'T00:02' }))
-      .concat(zmanItems(from, limit))
+      .concat(SHOW_ZMAN_ROWS ? zmanItems(from, limit) : [])
       .sort((a, b) => a.sort.localeCompare(b.sort));
 
     let html = '', curMonth = '';
