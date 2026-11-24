@@ -39,6 +39,11 @@ Replaces Tockify (paid). Rabbi Yehuda Horowitz's events calendar for jewishcarro
 - Share links: `<calendarUrl>e/<slug>/` (e.g. `torah-studies-nov-25`) → page with OG preview (flyer, title, date) →
   redirects to the jewishcarrollton.org page `#<slug>`; the embed script forwards the parent hash into the iframe, which opens that event.
   WhatsApp text: shareIntro line, *title*, date/time, link.
+- Collection pages (`config.collections`): one link for a group of events, e.g. `<calendarUrl>chanukah/` – cards with
+  RSVP / + Google Calendar / More info, an "Add all N to my calendar" button (`<key>/<key>.ics`, all events in one file with a
+  2-hour reminder; iPhone/Outlook add all at once, Android uses per-event Google buttons), OG preview for texting.
+  Listed by event slug; the build warns if a slug disappears (title/date changed). Current: `chanukah` (Dec 4 First Fridays,
+  Dec 9 Community Menorah, Dec 12 Minyan Shabbat Chanukah).
 - Hidden from site: events marked **Private** in Google (feed shows "Busy") and slugs in `config.hide`
   (currently `challah-bake-dec-17` – a private bat mitzvah).
 
@@ -69,4 +74,4 @@ window.addEventListener('message',function(e){var d=e.data;if(d){if(d.type==='ch
 - Test locally: `CAL_ICS_FILE=test/sample.ics node scripts/build.mjs && python3 -m http.server -d site`
   (or fetch the real public feed). Screenshot with Playwright before pushing.
 - Commit as `chabad-calendar <chabad-calendar@users.noreply.github.com>`; after pushing, check the Actions run and the live site.
-- Don't commit `site/events.json` or `site/e/` (built in CI).
+- Don't commit `site/events.json`, `site/e/` or collection folders (built in CI; `.gitignore` covers `site/*/` except `site/img/`).

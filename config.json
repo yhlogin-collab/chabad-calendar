@@ -45,5 +45,17 @@
     "Torah & Tea": "https://www.jewishcarrollton.org/templates/articlecco_cdo/aid/7009678/jewish/Torah-Tea.htm",
     "Torah Studies": "https://www.jewishcarrollton.org/templates/articlecco_cdo/aid/7086427/jewish/Weekly-Torah-Study.htm",
     "Kids in the Kitchen": "https://www.jewishcarrollton.org/templates/articlecco_cdo/aid/7009696/jewish/Kids-in-the-Kitchen.htm"
+  },
+  "collections": {
+    "chanukah": {
+      "title": "Chanukah at Chabad",
+      "subtitle": "Celebrate Chanukah with Chabad of Carrollton-Lewisville!",
+      "image": "img/community-menorah.jpg",
+      "events": [
+        "first-fridays-dec-4",
+        "community-menorah-at-the-village-shops-dec-9",
+        "minyan-kiddush-mikeitz-shabbat-chanukah-dec-12"
+      ]
+    }
   }
 }

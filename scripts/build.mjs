@@ -312,4 +312,108 @@ for (const e of events) {
   await fs.writeFile(path.join(shareDir, e.slug, 'index.html'), html);
 }
 console.log(`Wrote ${events.length} share pages.`);
+
+// ---------- Collection pages: one link for a group of events (e.g. /chanukah/) ----------
+// Each gets a page listing the events with "+ Google Calendar" per event, plus one .ics file
+// with all of them ("Add all" – iPhone/Outlook ask once to add every event).
+function icsEsc(s) { return String(s || '').replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/[,;]/g, m => '\\' + m); }
+function icsFold(line) { const out = []; while (line.length > 74) { out.push(line.slice(0, 74)); line = ' ' + line.slice(74); } out.push(line); return out.join('\r\n'); }
+const stamp = (iso) => iso.replace(/[-:]/g, '').replace(/\.\d+Z$/, 'Z');
+const dstamp = (d, add = 0) => { const t = new Date(d + 'T12:00:00Z'); t.setUTCDate(t.getUTCDate() + add); return t.toISOString().slice(0, 10).replace(/-/g, ''); };
+const plainDesc = (s) => String(s || '').replace(/\[\[([^|\]]*)\|([^\]]+)\]\]/g, (_, t, u) => t ? `${t} (${u})` : u);
+const rsvpFor = (e) => e.rsvp ? { href: e.rsvp, label: 'RSVP' }
+  : /rsvp/i.test(e.location) ? { href: `mailto:${config.site.email}?subject=${encodeURIComponent('RSVP: ' + e.title)}&body=${encodeURIComponent(`Hi! I'd like to RSVP for ${e.title}. Please send me the location.\n\nName:\nNumber of people:\n`)}`, label: '✉️ RSVP for location' }
+  : null;
+function whenLong(e) {
+  const day = fmt({ weekday: 'long', month: 'long', day: 'numeric' }, e.allDay ? e.date + 'T12:00:00Z' : e.start);
+  if (e.allDay) return day;
+  const t = (iso) => fmt({ hour: 'numeric', minute: '2-digit' }, iso).replace(':00', '').replace(' ', '').toLowerCase();
+  return `${day} · ${t(e.start)}${e.end && e.end !== e.start ? '–' + t(e.end) : ''}`;
+}
+function googleUrl(e) {
+  const dates = e.allDay ? `${dstamp(e.date)}/${dstamp(e.endDate || e.date, 1)}`
+    : `${stamp(e.start)}/${stamp(e.end && e.end !== e.start ? e.end : new Date(new Date(e.start).getTime() + 36e5).toISOString())}`;
+  return 'https://calendar.google.com/calendar/render?' + new URLSearchParams({ action: 'TEMPLATE', text: e.title, dates, details: plainDesc(e.description), location: /rsvp/i.test(e.location) ? '' : e.location, ctz: TZ });
+}
+for (const [key, col] of Object.entries(config.collections || {})) {
+  const evs = col.events.map(slug => events.find(e => e.slug === slug)).filter(Boolean);
+  const missing = col.events.filter(slug => !events.some(e => e.slug === slug));
+  if (missing.length) console.warn(`Collection "${key}": not found (renamed or removed?): ${missing.join(', ')}`);
+  if (!evs.length) continue;
+  const dir = path.join(root, 'site', key);
+  await fs.rm(dir, { recursive: true, force: true });
+  await fs.mkdir(dir, { recursive: true });
+  // all-in-one calendar file
+  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Chabad of Carrollton-Lewisville//Events//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', `X-WR-CALNAME:${icsEsc(col.title)}`];
+  for (const e of evs) {
+    lines.push('BEGIN:VEVENT', `UID:${e.slug}@jewishcarrollton.org`, `DTSTAMP:${stamp(now.toISOString())}`);
+    if (e.allDay) lines.push(`DTSTART;VALUE=DATE:${dstamp(e.date)}`, `DTEND;VALUE=DATE:${dstamp(e.endDate || e.date, 1)}`);
+    else lines.push(`DTSTART:${stamp(e.start)}`, `DTEND:${stamp(e.end && e.end !== e.start ? e.end : new Date(new Date(e.start).getTime() + 36e5).toISOString())}`);
+    lines.push(`SUMMARY:${icsEsc(e.title)}`, `DESCRIPTION:${icsEsc(plainDesc(e.description) + `\n\n${calUrl}e/${e.slug}/`)}`);
+    if (e.location && !/rsvp/i.test(e.location)) lines.push(`LOCATION:${icsEsc(e.location)}`);
+    if (!e.allDay) lines.push('BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${icsEsc(e.title)}`, 'TRIGGER:-PT2H', 'END:VALARM');
+    lines.push('END:VEVENT');
+  }
+  lines.push('END:VCALENDAR');
+  await fs.writeFile(path.join(dir, `${key}.ics`), lines.map(icsFold).join('\r\n') + '\r\n');
+
+  const img = calUrl + (col.image || 'img/og-default.jpg');
+  const cards = evs.map(e => {
+    const r = rsvpFor(e);
+    const pic = e.image ? (/^https?:/.test(e.image) ? e.image : '../' + e.image) : '../img/og-default.jpg';
+    const desc = plainDesc(e.description).replace(/\s+/g, ' ').trim();
+    return `<article class="card">
+  <img src="${he(pic)}" alt="">
+  <div class="body">
+    <h2>${he(e.title)}</h2>
+    <div class="when">${he(whenLong(e))}</div>
+    <div class="heb" dir="rtl">${he((data.days[e.date] || {}).heb || '')}</div>
+    ${e.location && !/rsvp/i.test(e.location) ? `<div class="where">📍 ${he(e.location)}</div>` : ''}
+    ${desc ? `<p>${he(desc.length > 220 ? desc.slice(0, 217).replace(/\s\S*$/, '') + '…' : desc)}</p>` : ''}
+    <div class="btns">
+      ${r ? `<a class="btn solid" href="${he(r.href)}">${he(r.label)}</a>` : ''}
+      <a class="btn" href="${he(googleUrl(e))}" target="_blank" rel="noopener">+ Google Calendar</a>
+      ${e.page ? `<a class="btn" href="${he(e.page)}">More info →</a>` : ''}
+    </div>
+  </div>
+</article>`;
+  }).join('\n');
+  const page = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${he(col.title)} – ${he(config.site.name)}</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="${he(config.site.name)}">
+<meta property="og:title" content="${he(col.title)}">
+<meta property="og:description" content="${he(evs.map(e => `${e.title.replace(/ - .*/, '')} (${fmt({ weekday: 'short', month: 'short', day: 'numeric' }, e.allDay ? e.date + 'T12:00:00Z' : e.start)})`).join(' · '))}">
+<meta property="og:image" content="${he(img)}">
+<meta property="og:url" content="${he(calUrl + key + '/')}">
+<meta name="twitter:card" content="summary_large_image">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Frank+Ruhl+Libre:wght@500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f7f3ec;color:#222;font:16px/1.45 Roboto,system-ui,sans-serif}
+.wrap{max-width:640px;margin:0 auto;padding:0 14px 40px}.bar{height:6px;background:#f04a26}
+header{text-align:center;padding:26px 6px 14px}h1{margin:0;color:#f04a26;font-size:30px}
+header p{margin:6px 0 0;color:#444}
+.all{display:block;text-align:center;margin:16px auto 6px;max-width:420px;background:#f04a26;color:#fff;text-decoration:none;font-weight:700;font-size:18px;padding:14px 18px;border-radius:30px;box-shadow:0 3px 10px rgba(240,74,38,.3)}
+.note{text-align:center;font-size:13px;color:#777;margin:0 0 18px}
+.card{background:#fff;border-radius:10px;overflow:hidden;margin:14px 0;box-shadow:0 2px 10px rgba(0,0,0,.08);display:grid;grid-template-columns:150px 1fr}
+.card img{width:150px;height:150px;object-fit:cover;display:block}.body{padding:12px 14px}
+h2{margin:0 0 4px;font-size:19px;color:#f04a26;font-weight:500}.when{font-weight:700}
+.heb{font-family:'Frank Ruhl Libre',serif;color:#b7862b;text-align:left}.where{color:#666;font-size:14px}
+.card p{margin:6px 0 0;font-size:14px;color:#444}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.btn{font-size:14px;border:1px solid #f04a26;color:#f04a26;border-radius:16px;padding:5px 12px;text-decoration:none;background:#fff}
+.btn.solid{background:#f04a26;color:#fff}
+.more{display:block;text-align:center;margin-top:22px;color:#f04a26}
+@media(max-width:520px){.card{grid-template-columns:1fr}.card img{width:100%;height:auto;aspect-ratio:1}}
+</style></head><body><div class="bar"></div><div class="wrap">
+<header><h1>${he(col.title)}</h1>${col.subtitle ? `<p>${he(col.subtitle)}</p>` : ''}</header>
+<a class="all" href="${he(key)}.ics">📅 Add all ${evs.length} to my calendar</a>
+<p class="note">iPhone &amp; Outlook: adds every event at once. Android: use “+ Google Calendar” on each event.</p>
+${cards}
+<a class="more" href="${he(config.site.pageUrl || calUrl)}">See the full calendar →</a>
+</div></body></html>`;
+  await fs.writeFile(path.join(dir, 'index.html'), page);
+  console.log(`Collection "${key}": ${evs.length} events → ${calUrl}${key}/`);
+}
 console.log(`Wrote ${events.length} events (${from} → ${to}).`);
