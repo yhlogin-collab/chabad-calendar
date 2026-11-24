@@ -39,5 +39,13 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
+      # GitHub sometimes needs a moment before the uploaded site can be found
+      - run: sleep 15
       - id: deploy
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+      - name: Retry deploy if the first try hit a GitHub hiccup
+        if: steps.deploy.outcome == 'failure'
+        run: sleep 30
+      - if: steps.deploy.outcome == 'failure'
         uses: actions/deploy-pages@v4
