@@ -238,7 +238,7 @@ const from = localDate(new Date(now.getTime() - config.daysBack * 864e5)).slice(
 const to = localDate(new Date(now.getTime() + config.daysAhead * 864e5));
 
 const ics = await loadIcs();
-const events = buildEvents(ics, from, to);
+let events = buildEvents(ics, from, to);
 const busyOnly = events.length > 0 && events.every(e => e.title === 'Busy');
 if (busyOnly) {
   console.error('Every event in the feed is titled "Busy". The calendar is shared as free/busy only.\n' +
@@ -257,6 +257,13 @@ for (const e of events) {
   used.add(slug);
   e.slug = slug;
 }
+
+// Leave off the website: events set to "Private" in Google Calendar (the public feed shows
+// them as "Busy"), and anything listed in config.hide by its link name, e.g. "challah-bake-dec-17".
+const hidden = new Set(config.hide || []);
+const before = events.length;
+events = events.filter(e => !(e.title === 'Busy' && !e.description) && !hidden.has(e.slug));
+if (before !== events.length) console.log(`Hid ${before - events.length} event(s).`);
 
 const data = { generated: now.toISOString(), timezone: TZ, from, to, site: config.site, events, days: jewishCalendar(from, to) };
 await fs.mkdir(path.join(root, 'site'), { recursive: true });

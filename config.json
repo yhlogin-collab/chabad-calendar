@@ -28,7 +28,9 @@
     "Kid Shabbat": "img/kid-shabbat.jpg",
     "Kids Shabbat": "img/kid-shabbat.jpg",
     "Minyan": "img/minyan-kiddush.jpg",
-    "Community Menorah": "img/community-menorah.jpg",
-    "Challah Bake": "img/challah-bake.jpg"
-  }
+    "Community Menorah": "img/community-menorah.jpg"
+  },
+  "hide": [
+    "challah-bake-dec-17"
+  ]
 }
