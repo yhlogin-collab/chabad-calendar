@@ -8,8 +8,11 @@ a calendar page (GitHub Pages) that is embedded on jewishcarrollton.org.
 ## What it shows
 - Month grid + list, styled like the site (prev/next, Today, List view)
 - Hebrew date on every day and event; Hebrew months in the header
-- Holidays, parsha, Friday candle lighting and havdalah for Lewisville (18 min.)
-- Event popup: flyer image, details, map link, RSVP, add to Google/Apple/Outlook, WhatsApp share, copy link
+- Holidays, parsha, Friday candle lighting and havdalah for Lewisville (18 min.) in the month grid
+- Series pictures for recurring events (by title), orange date tile otherwise
+- Event popup: picture, details, map link, RSVP / "RSVP for location" email, add to Google/Apple/Outlook, WhatsApp share, copy link
+- Readable share links (`e/torah-studies-nov-25/`) with WhatsApp/Facebook previews that open the event on jewishcarrollton.org
+- Events marked Private in Google Calendar stay off the site
 
 ## Tips for events in Google Calendar
 | You want | Do this in the Google event |
@@ -18,25 +21,16 @@ a calendar page (GitHub Pages) that is embedded on jewishcarrollton.org.
 | An RSVP button | Put a link in the description whose text or URL contains *RSVP*, *register* or *sign up* |
 | A location + map link | Fill in the Location field |
 | A multi-day event | Make it an all-day event spanning the days |
+| Keep an event off the website | Set the event's visibility to Private |
 
-## Embed code (paste into the ChabadOne article, HTML mode)
-Simple:
-```html
-<iframe src="https://yhlogin-collab.github.io/chabad-calendar/" style="width:100%;height:1600px;border:0" title="Holidays & Events"></iframe>
-```
-Auto-height (if the editor allows a script):
-```html
-<iframe id="chabadCal" src="https://yhlogin-collab.github.io/chabad-calendar/" style="width:100%;height:1600px;border:0" title="Holidays & Events"></iframe>
-<script>
-window.addEventListener('message',function(e){if(e.data&&e.data.type==='chabad-calendar-height'){document.getElementById('chabadCal').style.height=(e.data.height+20)+'px';}});
-</script>
-```
+## Embed code
+See CLAUDE.md for the current (XML-safe) embed code. ChabadOne parses article HTML as XML, so no bare `&`.
 
 ## Settings
-`config.json` – calendar ID, location for zmanim, candle-lighting minutes, how far back/ahead to show.
+`config.json` – calendar ID, zmanim location, series pictures (`images`), hidden events (`hide`), share text.
 
 ## Refresh now
-GitHub → Actions → "Update calendar" → Run workflow.
+GitHub → Actions → "Update calendar" → Run workflow. Otherwise it refreshes every 6 hours.
 
 ## Local test
 ```
