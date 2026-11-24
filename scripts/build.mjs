@@ -245,7 +245,56 @@ if (busyOnly) {
     'Set it to "See all event details", or put the secret iCal address in the CAL_ICS_URL secret.');
   process.exit(1);
 }
+// Readable, stable names for links: "torah-studies-nov-25" (year added only if needed)
+const MON = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+const used = new Set();
+for (const e of events) {
+  const base = e.title.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40).replace(/-$/, '') || 'event';
+  const [y, m, d] = e.date.split('-');
+  let slug = `${base}-${MON[+m - 1]}-${+d}`;
+  if (used.has(slug)) slug += `-${y}`;
+  if (used.has(slug)) slug += `-${(e.start || '').slice(11, 16).replace(':', '')}`;
+  used.add(slug);
+  e.slug = slug;
+}
+
 const data = { generated: now.toISOString(), timezone: TZ, from, to, site: config.site, events, days: jewishCalendar(from, to) };
 await fs.mkdir(path.join(root, 'site'), { recursive: true });
 await fs.writeFile(path.join(root, 'site', 'events.json'), JSON.stringify(data));
+
+// One tiny page per event at e/<slug>/ so links shared on WhatsApp/Facebook show the
+// flyer, title and date as a preview, then forward to the calendar on the website.
+const shareDir = path.join(root, 'site', 'e');
+await fs.rm(shareDir, { recursive: true, force: true });
+const he = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const fmt = (opts, iso) => new Intl.DateTimeFormat('en-US', { timeZone: TZ, ...opts }).format(new Date(iso));
+const calUrl = config.site.calendarUrl;
+for (const e of events) {
+  const when = e.allDay
+    ? fmt({ weekday: 'short', month: 'short', day: 'numeric' }, e.date + 'T12:00:00Z')
+    : `${fmt({ weekday: 'short', month: 'short', day: 'numeric' }, e.start)} · ${fmt({ hour: 'numeric', minute: '2-digit' }, e.start).replace(':00', '').replace(' ', '').toLowerCase()}`;
+  const heb = (data.days[e.date] || {}).heb || '';
+  const desc = e.description.replace(/\[\[([^|\]]*)\|[^\]]+\]\]/g, '$1').replace(/\s+/g, ' ').trim();
+  const shortDesc = desc.length > 160 ? desc.slice(0, 157).replace(/\s\S*$/, '') + '…' : desc;
+  const img = e.image ? (/^https?:/.test(e.image) ? e.image : calUrl + e.image) : calUrl + 'img/og-default.jpg';
+  const target = `${config.site.pageUrl || calUrl}#${e.slug}`;
+  const html = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<title>${he(e.title)} – ${he(when)}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="${he(config.site.name)}">
+<meta property="og:title" content="${he(e.title)} – ${he(when)}">
+<meta property="og:description" content="${he(shortDesc || heb + ' · ' + config.site.name)}">
+<meta property="og:image" content="${he(img)}">
+<meta property="og:url" content="${he(calUrl + 'e/' + e.slug + '/')}">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="${he(target)}">
+<meta http-equiv="refresh" content="0;url=${he(target)}">
+<style>body{font:16px system-ui,sans-serif;text-align:center;padding:40px 16px;color:#333}a{color:#f04a26}</style>
+</head><body><p>Opening <a href="${he(target)}">${he(e.title)}</a>…</p>
+<script>location.replace(${JSON.stringify(target)});</script></body></html>`;
+  await fs.mkdir(path.join(shareDir, e.slug), { recursive: true });
+  await fs.writeFile(path.join(shareDir, e.slug, 'index.html'), html);
+}
+console.log(`Wrote ${events.length} share pages.`);
 console.log(`Wrote ${events.length} events (${from} → ${to}).`);

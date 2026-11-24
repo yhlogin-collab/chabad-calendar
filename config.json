@@ -14,7 +14,10 @@
   "site": {
     "name": "Chabad of Carrollton-Lewisville",
     "email": "info@JewishCarrollton.org",
-    "defaultLocation": "Lewisville, TX"
+    "defaultLocation": "Lewisville, TX",
+    "pageUrl": "https://www.jewishcarrollton.org/templates/articlecco_cdo/aid/7009553/jewish/Holidays-Events.htm",
+    "calendarUrl": "https://yhlogin-collab.github.io/chabad-calendar/",
+    "shareIntro": "I think you'll enjoy this program at Chabad of Carrollton-Lewisville!"
   },
   "images": {
     "Bagels, Lox": "img/blt.jpg",

@@ -74,11 +74,31 @@
     a.href = URL.createObjectURL(blob); a.download = e.title.replace(/[^\w ]+/g, '').trim().replace(/\s+/g, '-') + '.ics';
     document.body.appendChild(a); a.click(); a.remove();
   }
+  // Shared links go to the event's own small page (nice WhatsApp/Facebook preview),
+  // which forwards to the calendar on jewishcarrollton.org with this event open.
   const shareUrl = (e) => {
-    const base = (DATA.site && DATA.site.pageUrl) || location.href.split('#')[0];
-    return base + '#e=' + encodeURIComponent(e.id);
+    const base = (DATA.site && DATA.site.calendarUrl) || location.href.split('#')[0].replace(/index\.html$/, '');
+    return `${base}e/${e.slug}/`;
   };
-  const waLink = (e) => 'https://wa.me/?text=' + encodeURIComponent(`${e.title} – ${whenText(e)}\n${shareUrl(e)}`);
+  const shareText = (e) => {
+    const intro = (DATA.site && DATA.site.shareIntro) || '';
+    return `${intro ? intro + '\n\n' : ''}*${e.title}*\n${whenText(e)}\n\n${shareUrl(e)}`;
+  };
+  const waLink = (e) => 'https://wa.me/?text=' + encodeURIComponent(shareText(e));
+  // Copy that also works inside the website's embed, where the clipboard API is often blocked
+  function copyText(text) {
+    const legacy = () => {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+      document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, text.length);
+      let ok = false; try { ok = document.execCommand('copy'); } catch { ok = false; }
+      ta.remove(); return ok;
+    };
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text).then(() => true, () => legacy());
+    }
+    return Promise.resolve(legacy());
+  }
 
   // ---------- Shabbos / Yom Tov / Chanukah strips ----------
   function zmanItems(from, to) {
@@ -229,7 +249,7 @@
   }
 
   // ---------- modal ----------
-  function openEvent(id) {
+  function openEvent(id, anchor) {
     const e = evById[id];
     if (!e) return;
     const isAddress = e.location && /\d/.test(e.location) && !/rsvp/i.test(e.location);
@@ -250,16 +270,31 @@
           <button type="button" class="chip" data-act="ics">+ Apple / Outlook</button>
           <a class="chip" href="${esc(waLink(e))}" target="_blank" rel="noopener">Share on WhatsApp</a>
           <button type="button" class="chip" data-act="copy">Copy link</button>
+          ${navigator.share && matchMedia('(pointer:coarse)').matches ? '<button type="button" class="chip" data-act="share">Share…</button>' : ''}
         </div>
         ${files}
       </div>`;
     $('#mBody').querySelector('[data-act=ics]').onclick = () => icsFile(e);
     $('#mBody').querySelector('[data-act=copy]').onclick = (ev) => {
-      navigator.clipboard?.writeText(shareUrl(e)).then(() => { ev.target.textContent = 'Copied ✓'; }, () => prompt('Copy this link:', shareUrl(e)));
+      const btn = ev.currentTarget;
+      copyText(shareUrl(e)).then(ok => {
+        btn.textContent = ok ? 'Link copied ✓' : 'Copy failed';
+        if (!ok) prompt('Copy this link:', shareUrl(e));
+        setTimeout(() => { btn.textContent = 'Copy link'; }, 2500);
+      });
+    };
+    const nativeBtn = $('#mBody').querySelector('[data-act=share]');
+    if (nativeBtn) nativeBtn.onclick = () => {
+      navigator.share({ title: e.title, text: shareText(e).replace(/\n*https?:\S+$/, '').replace(/\*/g, ''), url: shareUrl(e) }).catch(() => {});
     };
     $('#modal').hidden = false;
-    $('#modal .close').focus();
-    history.replaceState(null, '', '#e=' + encodeURIComponent(id));
+    // Inside the website's embed the calendar is one tall page, so put the popup next to
+    // the event that was clicked instead of at the top of the calendar.
+    const inFrame = window.parent !== window;
+    const top = inFrame && anchor ? Math.max(24, anchor.getBoundingClientRect().top + window.scrollY - 160) : 24;
+    $('#modal').style.paddingTop = top + 'px';
+    $('#modal .close').focus({ preventScroll: true });
+    history.replaceState(null, '', '#' + e.slug);
     postHeight();
   }
   function closeModal() { $('#modal').hidden = true; history.replaceState(null, '', location.pathname + location.search); }
@@ -284,9 +319,9 @@
     $('#grid').addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); pick(ev.target.closest('.cell')); } });
     $('#list').addEventListener('click', ev => {
       if (ev.target.closest('a')) return;
-      const a = ev.target.closest('.ev'); if (a) openEvent(a.dataset.id);
+      const a = ev.target.closest('.ev'); if (a) openEvent(a.dataset.id, a);
     });
-    $('#list').addEventListener('keydown', ev => { if (ev.key === 'Enter') { const a = ev.target.closest('.ev'); if (a) openEvent(a.dataset.id); } });
+    $('#list').addEventListener('keydown', ev => { if (ev.key === 'Enter') { const a = ev.target.closest('.ev'); if (a) openEvent(a.dataset.id, a); } });
     $('#modal').addEventListener('click', ev => { if (ev.target.id === 'modal' || ev.target.closest('.close')) closeModal(); });
     document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && !$('#modal').hidden) closeModal(); });
   }
@@ -313,8 +348,14 @@
     const dm = location.hash.match(/^#d=(\d{4}-\d\d-\d\d)/);
     if (dm) { state.sel = dm[1]; state.y = +dm[1].slice(0, 4); state.m = dm[1].slice(5, 7) - 1; }
     bind(); render();
-    const em = location.hash.match(/^#e=(.+)$/);
-    if (em) openEvent(decodeURIComponent(em[1]));
+    const h = decodeURIComponent(location.hash.replace(/^#(e=)?/, ''));
+    if (h && !/^d=/.test(h)) {
+      const ev = DATA.events.find(x => x.slug === h) || evById[h];
+      if (ev) {
+        state.y = +ev.date.slice(0, 4); state.m = ev.date.slice(5, 7) - 1; render();
+        openEvent(ev.id);
+      }
+    }
     const g = new Date(DATA.generated);
     $('#updated').textContent = 'Updated ' + g.toLocaleString('en-US', { timeZone: TZ, month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
     if ('ResizeObserver' in window) new ResizeObserver(postHeight).observe(document.body);
