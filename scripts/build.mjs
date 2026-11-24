@@ -115,6 +115,13 @@ function seriesImage(title) {
   return null;
 }
 
+// The event series' own page on jewishcarrollton.org, from config.links (title prefix → URL)
+function seriesPage(title) {
+  const t = title.toLowerCase();
+  for (const [key, url] of Object.entries(config.links || {})) if (url && t.startsWith(key.toLowerCase())) return url;
+  return null;
+}
+
 // RSVP / registration link: first link whose text or URL looks like signup, else none.
 function findRsvp(desc) {
   const re = /\[\[([^|\]]*)\|([^\]]+)\]\]/g;
@@ -160,6 +167,7 @@ function buildEvents(icsText, from, to) {
       image: att.image || seriesImage(title),
       files: att.files,
       rsvp: findRsvp(desc),
+      page: seriesPage(title),
     });
   };
 

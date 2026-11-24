@@ -16,7 +16,7 @@ Replaces Tockify (paid). Rabbi Yehuda Horowitz's events calendar for jewishcarro
 
 ## Files
 - `config.json` – calendar ID, timezone, location for zmanim (Lewisville, 18-min candles, havdalah 8.5°),
-  `site` (pageUrl, calendarUrl, shareIntro, email), `images` (series → picture), `hide` (event slugs to leave off).
+  `site` (pageUrl, calendarUrl, shareIntro, email), `images` (series → picture), `links` (series → page on the site), `hide` (event slugs to leave off).
 - `scripts/build.mjs` – parses iCal with ical.js (recurrences, exceptions, EXDATE, all-day), times as wall-clock in
   America/Chicago; Hebrew dates/holidays/parsha/candles/havdalah via @hebcal/core; readable slugs; share pages with OG tags.
 - `site/index.html`, `site/style.css`, `site/app.js` – static page, no framework.
@@ -33,6 +33,9 @@ Replaces Tockify (paid). Rabbi Yehuda Horowitz's events calendar for jewishcarro
 - RSVP: a description link containing RSVP/register/sign up → "RSVP" button; a Location containing "RSVP"
   → hidden location + "✉️ RSVP for location" mailto to info@JewishCarrollton.org with subject/body prefilled.
 - An event whose end equals its start shows only the start time.
+- "More info →" button (list + popup, opens in the whole window via target=_top) to the series' own page on
+  jewishcarrollton.org, from `config.links` (title prefix → URL): Community/Chanukah Menorah, Minyan, Kid(s) Shabbat,
+  First Fridays, Bagels, Lox / BLT, Torah & Tea, Torah Studies (Weekly Torah Study page), Kids in the Kitchen.
 - Share links: `<calendarUrl>e/<slug>/` (e.g. `torah-studies-nov-25`) → page with OG preview (flyer, title, date) →
   redirects to the jewishcarrollton.org page `#<slug>`; the embed script forwards the parent hash into the iframe, which opens that event.
   WhatsApp text: shareIntro line, *title*, date/time, link.
@@ -57,7 +60,6 @@ window.addEventListener('message',function(e){var d=e.data;if(d){if(d.type==='ch
 ```
 
 ## Pending
-- New Torah Studies picture from the user (swap `site/img/torah-studies.jpg`).
 - Custom domain `events.jewishcarrollton.org`: user emailed/will email ChabadOne support (they manage DNS) for
   `CNAME events → yhlogin-collab.github.io`. When live: set the Pages custom domain, change `site.calendarUrl`
   to `https://events.jewishcarrollton.org/`, give the user the embed line with the new src, verify HTTPS.

@@ -173,6 +173,8 @@
   const rsvpLoc = (e) => /rsvp/i.test(e.location || '');
   const mailRsvp = (e) => `mailto:${(DATA.site && DATA.site.email) || ''}?subject=${encodeURIComponent(`RSVP: ${e.title} – ${dayLabel(e.date)}`)}` +
     `&body=${encodeURIComponent(`Hi! I'd like to RSVP for ${e.title} on ${whenText(e)}. Please send me the location.\n\nName:\nNumber of people:\n`)}`;
+  // Link to the series' full page on jewishcarrollton.org (opens in the whole window, not inside the calendar)
+  const pageButton = (e, cls = 'chip') => e.page ? `<a class="${cls}" href="${esc(e.page)}" target="_top">More info →</a>` : '';
   function rsvpButton(e, cls = 'chip solid') {
     if (e.rsvp) return `<a class="${cls}" href="${esc(e.rsvp)}" target="_blank" rel="noopener">RSVP</a>`;
     if (rsvpLoc(e)) return `<a class="${cls}" href="${esc(mailRsvp(e))}">✉️ RSVP for location</a>`;
@@ -191,7 +193,7 @@
       <div class="when">${esc(whenText(e))}<span class="heb" dir="rtl">${esc(heb(e.date))}</span></div>
       ${e.location && !rsvpLoc(e) ? `<div class="where">📍 ${esc(e.location)}</div>` : ''}
       ${e.description ? `<div class="desc">${esc(plain(e.description))}</div>` : ''}
-      ${rsvpButton(e) ? `<div class="chips">${rsvpButton(e)}</div>` : ''}
+      ${rsvpButton(e) || e.page ? `<div class="chips">${rsvpButton(e)}${pageButton(e, 'chip')}</div>` : ''}
       </div></article>`;
     void d;
   }
@@ -266,6 +268,7 @@
         ${e.description ? `<div class="body">${richText(e.description)}</div>` : '<div style="height:14px"></div>'}
         <div class="actions">
           ${rsvpButton(e)}
+          ${pageButton(e, 'chip')}
           <a class="chip" href="${esc(googleLink(e))}" target="_blank" rel="noopener">+ Google Calendar</a>
           <button type="button" class="chip" data-act="ics">+ Apple / Outlook</button>
           <a class="chip" href="${esc(waLink(e))}" target="_blank" rel="noopener">Share on WhatsApp</a>
