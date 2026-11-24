@@ -115,6 +115,13 @@ function seriesImage(title) {
   return null;
 }
 
+// Which series an event belongs to (config.series: key → { name, match: [title prefixes] })
+function seriesKey(title) {
+  const t = title.toLowerCase();
+  for (const [key, s] of Object.entries(config.series || {})) if (s.match.some(m => t.startsWith(m.toLowerCase()))) return key;
+  return null;
+}
+
 // The event series' own page on jewishcarrollton.org, from config.links (title prefix → URL)
 function seriesPage(title) {
   const t = title.toLowerCase();
@@ -165,6 +172,8 @@ function buildEvents(icsText, from, to) {
       location: (comp.getFirstPropertyValue('location') || '').trim(),
       description: desc,
       image: att.image || seriesImage(title),
+      flyer: att.image || null,
+      series: seriesKey(title),
       files: att.files,
       rsvp: findRsvp(desc),
       page: seriesPage(title),
@@ -273,7 +282,7 @@ const before = events.length;
 events = events.filter(e => !(e.title === 'Busy' && !e.description) && !hidden.has(e.slug));
 if (before !== events.length) console.log(`Hid ${before - events.length} event(s).`);
 
-const data = { generated: now.toISOString(), timezone: TZ, from, to, site: config.site, events, days: jewishCalendar(from, to) };
+const data = { generated: now.toISOString(), timezone: TZ, from, to, site: config.site, series: Object.fromEntries(Object.entries(config.series || {}).map(([k, v]) => [k, v.name])), events, days: jewishCalendar(from, to) };
 await fs.mkdir(path.join(root, 'site'), { recursive: true });
 await fs.writeFile(path.join(root, 'site', 'events.json'), JSON.stringify(data));
 

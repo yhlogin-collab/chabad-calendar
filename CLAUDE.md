@@ -16,7 +16,7 @@ Replaces Tockify (paid). Rabbi Yehuda Horowitz's events calendar for jewishcarro
 
 ## Files
 - `config.json` – calendar ID, timezone, location for zmanim (Lewisville, 18-min candles, havdalah 8.5°),
-  `site` (pageUrl, calendarUrl, shareIntro, email), `images` (series → picture), `links` (series → page on the site), `hide` (event slugs to leave off).
+  `site` (pageUrl, calendarUrl, shareIntro, email), `images` (series → picture), `links` (series → page on the site), `series` (key → name + title prefixes, for next-event boxes), `collections`, `hide` (event slugs to leave off).
 - `scripts/build.mjs` – parses iCal with ical.js (recurrences, exceptions, EXDATE, all-day), times as wall-clock in
   America/Chicago; Hebrew dates/holidays/parsha/candles/havdalah via @hebcal/core; readable slugs; share pages with OG tags.
 - `site/index.html`, `site/style.css`, `site/app.js` – static page, no framework.
@@ -44,6 +44,20 @@ Replaces Tockify (paid). Rabbi Yehuda Horowitz's events calendar for jewishcarro
   2-hour reminder; iPhone/Outlook add all at once, Android uses per-event Google buttons), OG preview for texting.
   Listed by event slug; the build warns if a slug disappears (title/date changed). Current: `chanukah` (Dec 4 First Fridays,
   Dec 9 Community Menorah, Dec 12 Minyan Shabbat Chanukah).
+- "Next event" boxes for the series pages on jewishcarrollton.org: `site/next/index.html?s=<series key>` reads
+  `../events.json` in the browser and shows the next upcoming date (rolls over by itself after an event ends),
+  Hebrew date, RSVP/Google/Apple buttons, a per-date flyer if one is attached to that Google event (`e.flyer`),
+  and up to 6 later dates. No dates → "New dates coming soon!". Series keys come from `config.series`
+  (name + title prefixes): minyan, kid-shabbat, blt, first-fridays, torah-and-tea, torah-studies, kids-in-the-kitchen,
+  community-menorah. Each event carries `series` in events.json. Auto-height via postMessage type `chabad-next-height`.
+  Embed (XML-safe, identical script on every page, only `s=` changes):
+  ```html
+  <iframe src="https://yhlogin-collab.github.io/chabad-calendar/next/?s=minyan" style="width:100%;height:560px;border:0" scrolling="no" title="Next event"></iframe>
+  <script>
+  window.addEventListener('message',function(e){var d=e.data;if(d){if(d.type==='chabad-next-height'){var fs=document.getElementsByTagName('iframe');var i=fs.length;while(i--){if(fs[i].contentWindow===e.source){fs[i].style.height=(d.height+10)+'px';}}}}});
+  </script>
+  ```
+  (No `<` or `&` in CMS scripts – hence `while(i--)`.)
 - Hidden from site: events marked **Private** in Google (feed shows "Busy") and slugs in `config.hide`
   (currently `challah-bake-dec-17` – a private bat mitzvah).
 

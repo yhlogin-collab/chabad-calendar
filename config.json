@@ -57,5 +57,58 @@
         "minyan-kiddush-mikeitz-shabbat-chanukah-dec-12"
       ]
     }
+  },
+  "series": {
+    "minyan": {
+      "name": "Shabbat Minyan & Kiddush",
+      "match": [
+        "Minyan"
+      ]
+    },
+    "kid-shabbat": {
+      "name": "Kid Shabbat",
+      "match": [
+        "Kid Shabbat",
+        "Kids Shabbat"
+      ]
+    },
+    "blt": {
+      "name": "BLT – Bagels, Lox, Tefillin",
+      "match": [
+        "Bagels, Lox",
+        "BLT"
+      ]
+    },
+    "first-fridays": {
+      "name": "First Fridays",
+      "match": [
+        "First Fridays"
+      ]
+    },
+    "torah-and-tea": {
+      "name": "Torah & Tea",
+      "match": [
+        "Torah & Tea"
+      ]
+    },
+    "torah-studies": {
+      "name": "Weekly Torah Study",
+      "match": [
+        "Torah Studies"
+      ]
+    },
+    "kids-in-the-kitchen": {
+      "name": "Kids in the Kitchen",
+      "match": [
+        "Kids in the Kitchen"
+      ]
+    },
+    "community-menorah": {
+      "name": "Community Menorah Lighting",
+      "match": [
+        "Community Menorah",
+        "Chanukah Menorah"
+      ]
+    }
   }
 }

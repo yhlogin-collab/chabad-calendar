@@ -3,3 +3,4 @@ site/events.json
 site/e/
 site/*/
 !site/img/
+!site/next/

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Next event – Chabad of Carrollton-Lewisville</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;600;800&family=Frank+Ruhl+Libre:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{--accent:#f04a26;--ink:#222;--muted:#666;--gold:#b7862b;--line:#e6e0d6;--heb:'Frank Ruhl Libre',serif}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:transparent;color:var(--ink);font:16px/1.45 Mulish,system-ui,sans-serif}
+  a{color:var(--accent)}
+  .wrap{max-width:640px;margin:0 auto;padding:4px 2px 8px}
+  .label{text-align:center;font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+  .card{display:grid;grid-template-columns:120px 1fr;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+  .date{background:var(--accent);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 6px;text-align:center;line-height:1.1}
+  .date .dow{font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+  .date .mon{font-size:15px;font-weight:600;text-transform:uppercase;margin-top:2px}
+  .date .day{font-size:44px;font-weight:800}
+  .date .hd{font-family:var(--heb);font-size:15px;margin-top:4px}
+  .info{padding:12px 16px}
+  .info h3{margin:0 0 2px;font-size:19px;font-weight:800}
+  .info .when{font-weight:600}
+  .info .heb{font-family:var(--heb);color:var(--gold)}
+  .info .where{color:var(--muted);font-size:14px;margin-top:2px}
+  .info .soon{display:inline-block;background:#fff1ec;color:var(--accent);font-size:12px;font-weight:800;border-radius:10px;padding:1px 8px;margin-bottom:4px}
+  .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .btn{font:600 14px Mulish,sans-serif;border:1px solid var(--accent);color:var(--accent);background:#fff;border-radius:16px;padding:5px 12px;text-decoration:none;cursor:pointer}
+  .btn.solid{background:var(--accent);color:#fff}
+  .flyer{margin-top:14px;text-align:center}
+  .flyer img{max-width:100%;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+  .upcoming{margin-top:16px}
+  .upcoming h4{margin:0 0 6px;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:center}
+  .upcoming ul{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+  .upcoming li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 6px;border-bottom:1px solid var(--line);font-size:15px}
+  .upcoming li .d b{font-weight:800}
+  .upcoming li .d .heb{font-family:var(--heb);color:var(--gold);margin-left:6px}
+  .upcoming li .d .t{color:var(--muted);font-size:13px;display:block}
+  .upcoming li a{font-size:13px;white-space:nowrap;text-decoration:none;font-weight:600}
+  .empty{text-align:center;padding:18px;border:1px dashed var(--line);border-radius:10px;color:var(--muted)}
+  @media (max-width:480px){
+    .card{grid-template-columns:92px 1fr}
+    .date .day{font-size:34px}
+    .info{padding:10px 12px}
+    .info h3{font-size:17px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+(() => {
+  'use strict';
+  const key = new URLSearchParams(location.search).get('s') || '';
+  const LIST = 6;                                   // how many later dates to list
+  const $app = document.getElementById('app');
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const pad = (n) => String(n).padStart(2, '0');
+  let TZ = 'America/Chicago', DATA;
+
+  const fmt = (opts, d) => new Intl.DateTimeFormat('en-US', { timeZone: TZ, ...opts }).format(d);
+  const at = (e) => e.allDay ? new Date(e.date + 'T12:00:00Z') : new Date(e.start);
+  const fmtTZ = (e, opts) => fmt(e.allDay ? { ...opts, timeZone: 'UTC' } : opts, at(e));
+  const time = (iso) => fmt({ hour: 'numeric', minute: '2-digit' }, new Date(iso)).replace(':00', '').replace(' ', '').toLowerCase();
+  const timeRange = (e) => e.allDay ? '' : time(e.start) + (e.end && e.end !== e.start ? ' – ' + time(e.end) : '');
+  const heb = (e) => (DATA.days[e.date] || {}).heb || '';
+  const plain = (s) => String(s || '').replace(/\[\[([^|\]]*)\|([^\]]+)\]\]/g, '$1');
+
+  // still upcoming? (timed events count until they end; all-day events through that day)
+  function upcoming(e, now) {
+    if (e.allDay) return (e.endDate || e.date) >= fmt({ year: 'numeric', month: '2-digit', day: '2-digit' }, now).replace(/(\d+)\/(\d+)\/(\d+)/, '$3-$1-$2');
+    const end = e.end && e.end !== e.start ? new Date(e.end) : new Date(new Date(e.start).getTime() + 2 * 36e5);
+    return end > now;
+  }
+
+  // calendar links
+  const stamp = (iso) => iso.replace(/[-:]/g, '').replace(/\.\d+Z$/, 'Z');
+  const dstamp = (s, add = 0) => { const d = new Date(s + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + add); return d.toISOString().slice(0, 10).replace(/-/g, ''); };
+  const endIso = (e) => e.end && e.end !== e.start ? e.end : new Date(new Date(e.start).getTime() + 36e5).toISOString();
+  const realLoc = (e) => e.location && !/rsvp/i.test(e.location) ? e.location : '';
+  function google(e) {
+    const dates = e.allDay ? `${dstamp(e.date)}/${dstamp(e.endDate || e.date, 1)}` : `${stamp(e.start)}/${stamp(endIso(e))}`;
+    return 'https://calendar.google.com/calendar/render?' + new URLSearchParams({ action: 'TEMPLATE', text: e.title, dates, details: plain(e.description), location: realLoc(e), ctz: TZ });
+  }
+  function ics(e) {
+    const f = (s) => String(s || '').replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/[,;]/g, m => '\\' + m);
+    const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Chabad of Carrollton-Lewisville//Events//EN', 'BEGIN:VEVENT',
+      `UID:${e.slug}@jewishcarrollton.org`, `DTSTAMP:${stamp(new Date().toISOString())}`];
+    if (e.allDay) L.push(`DTSTART;VALUE=DATE:${dstamp(e.date)}`, `DTEND;VALUE=DATE:${dstamp(e.endDate || e.date, 1)}`);
+    else L.push(`DTSTART:${stamp(e.start)}`, `DTEND:${stamp(endIso(e))}`);
+    L.push(`SUMMARY:${f(e.title)}`, `DESCRIPTION:${f(plain(e.description))}`, `LOCATION:${f(realLoc(e))}`, 'END:VEVENT', 'END:VCALENDAR');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([L.join('\r\n')], { type: 'text/calendar' }));
+    a.download = e.slug + '.ics'; document.body.appendChild(a); a.click(); a.remove();
+  }
+  function rsvp(e) {
+    if (e.rsvp) return `<a class="btn solid" href="${esc(e.rsvp)}" target="_top">RSVP</a>`;
+    const email = (DATA.site && DATA.site.email) || 'info@JewishCarrollton.org';
+    const when = `${fmtTZ(e, { weekday: 'long', month: 'long', day: 'numeric' })}${e.allDay ? '' : ' at ' + time(e.start)}`;
+    const href = `mailto:${email}?subject=${encodeURIComponent('RSVP: ' + e.title + ' – ' + fmtTZ(e, { month: 'short', day: 'numeric' }))}` +
+      `&body=${encodeURIComponent(`Hi! I'd like to RSVP for ${e.title} on ${when}.${/rsvp/i.test(e.location) ? ' Please send me the location.' : ''}\n\nName:\nNumber of people:\n`)}`;
+    return `<a class="btn solid" href="${esc(href)}" target="_top">✉️ RSVP</a>`;
+  }
+
+  function render() {
+    const name = (DATA.series || {})[key] || 'Event';
+    const now = new Date();
+    const evs = DATA.events.filter(e => e.series === key && upcoming(e, now));
+    if (!key || !(key in (DATA.series || {}))) { $app.innerHTML = '<div class="empty">Unknown event series.</div>'; return; }
+    if (!evs.length) {
+      const email = (DATA.site && DATA.site.email) || 'info@JewishCarrollton.org';
+      $app.innerHTML = `<p class="label">Next ${esc(name)}</p><div class="empty">New dates coming soon!<br>Email <a href="mailto:${esc(email)}" target="_top">${esc(email)}</a> to hear first.</div>`;
+      return;
+    }
+    const e = evs[0];
+    const days = Math.round((new Date(e.date + 'T12:00:00Z') - new Date(fmt({ year: 'numeric', month: '2-digit', day: '2-digit' }, now).replace(/(\d+)\/(\d+)\/(\d+)/, '$3-$1-$2') + 'T12:00:00Z')) / 864e5);
+    const soon = days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : days < 7 ? 'This week' : '';
+    $app.innerHTML = `
+      <p class="label">Next ${esc(name)}</p>
+      <div class="card">
+        <div class="date">
+          <span class="dow">${esc(fmtTZ(e, { weekday: 'long' }))}</span>
+          <span class="mon">${esc(fmtTZ(e, { month: 'long' }))}</span>
+          <span class="day">${esc(fmtTZ(e, { day: 'numeric' }))}</span>
+          <span class="hd" dir="rtl">${esc(heb(e))}</span>
+        </div>
+        <div class="info">
+          ${soon ? `<span class="soon">${soon}</span>` : ''}
+          <h3>${esc(e.title)}</h3>
+          <div class="when">${esc(fmtTZ(e, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }))}${e.allDay ? '' : ' · ' + esc(timeRange(e))}</div>
+          ${realLoc(e) ? `<div class="where">📍 ${esc(realLoc(e))}</div>` : ''}
+          <div class="btns">
+            ${rsvp(e)}
+            <a class="btn" href="${esc(google(e))}" target="_blank" rel="noopener">+ Google Calendar</a>
+            <button type="button" class="btn" id="ics">+ Apple / Outlook</button>
+          </div>
+        </div>
+      </div>
+      ${e.flyer ? `<div class="flyer"><img src="${esc(e.flyer.replace(/sz=w\d+/, 'sz=w1200'))}" alt="${esc(e.title)} flyer" onerror="this.parentNode.remove()"></div>` : ''}
+      ${evs.length > 1 ? `<div class="upcoming"><h4>Coming up</h4><ul>${evs.slice(1, 1 + LIST).map(x => `
+        <li><span class="d"><b>${esc(fmtTZ(x, { weekday: 'short', month: 'short', day: 'numeric' }))}</b><span class="heb" dir="rtl">${esc(heb(x))}</span>
+          ${!x.allDay || x.title.includes(' - ') ? `<span class="t">${esc([timeRange(x), x.title.includes(' - ') ? x.title.replace(/^.*? - /, '') : ''].filter(Boolean).join(' · '))}</span>` : ''}</span>
+          <a href="${esc(google(x))}" target="_blank" rel="noopener">+ Calendar</a></li>`).join('')}</ul></div>` : ''}`;
+    const b = document.getElementById('ics'); if (b) b.onclick = () => ics(e);
+    document.querySelectorAll('img').forEach(i => i.addEventListener('load', postHeight));
+  }
+
+  function postHeight() {
+    if (window.parent === window) return;
+    window.parent.postMessage({ type: 'chabad-next-height', series: key, height: document.documentElement.scrollHeight }, '*');
+  }
+
+  fetch('../events.json?t=' + Date.now()).then(r => r.json()).then(d => {
+    DATA = d; TZ = d.timezone || TZ;
+    render(); postHeight();
+    if ('ResizeObserver' in window) new ResizeObserver(postHeight).observe(document.body);
+    setInterval(() => { render(); postHeight(); }, 10 * 60 * 1000);   // roll over to the next date if the page stays open
+  }).catch(() => { $app.innerHTML = ''; postHeight(); });
+})();
+</script>
+</body>
+</html>
