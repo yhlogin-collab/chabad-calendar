@@ -62,6 +62,12 @@ Replaces Tockify (paid). Rabbi Yehuda Horowitz's events calendar for jewishcarro
   Shabbat/Yom Tov line (parsha, candle lighting, havdalah) + cards for events in the next 7 days (at least 3, at most 4;
   "+ N more this week" on the button). Cards link to `pageUrl#slug` (target _top) so the Holidays & Events page opens
   that event. Same embed script as the next-event boxes (postMessage type `chabad-next-height`), src `<calendarUrl>upcoming/`.
+- `site/embed.js` – loaded site-wide from ChabadOne's **footer code** (the home page has no HTML editing):
+  `<script src="https://yhlogin-collab.github.io/chabad-calendar/embed.js" async="async"></script>`.
+  On the home page (`body.home`) it inserts `#chabad-upcoming` (white section, iframe of `upcoming/`) right after the
+  `.promo_slider` row, before the gray "About" `.hp-row`; fallbacks: before first `.hp-row`, else top of `#content`.
+  On every page it handles `chabad-next-height` auto-sizing, so next-event boxes only need the `<iframe>` line.
+  Change placement/behavior here – no re-pasting needed by the user.
 - Hidden from site: events marked **Private** in Google (feed shows "Busy") and slugs in `config.hide`
   (currently `challah-bake-dec-17` – a private bat mitzvah).
 
