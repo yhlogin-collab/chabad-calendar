@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Upcoming at Chabad – Chabad of Carrollton-Lewisville</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;600;800&family=Frank+Ruhl+Libre:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{--accent:#f04a26;--orange:#ee7d22;--ink:#222;--muted:#666;--gold:#b7862b;--line:#e6e0d6;--heb:'Frank Ruhl Libre',serif}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:transparent;color:var(--ink);font:16px/1.4 Mulish,system-ui,sans-serif}
+  a{color:var(--accent)}
+  .wrap{max-width:1100px;margin:0 auto;padding:6px 8px 10px}
+  h2{margin:0;text-align:center;color:var(--orange);font-size:30px;font-weight:800;letter-spacing:.02em;text-transform:uppercase}
+  .shabbos{text-align:center;margin:6px 0 18px;color:#555;font-size:15px}
+  .shabbos b{color:var(--ink)}
+  .shabbos .heb{font-family:var(--heb);color:var(--gold)}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,250px));justify-content:center;gap:18px}
+  .card{display:flex;flex-direction:column;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);text-decoration:none;color:inherit;transition:transform .15s, box-shadow .15s}
+  .card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.12)}
+  .pic{position:relative;aspect-ratio:1/1;background:#f3efe8}
+  .pic img{width:100%;height:100%;object-fit:cover;display:block}
+  .tile{width:100%;height:100%;background:var(--accent);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:10px}
+  .tile .m{font-size:15px;letter-spacing:.1em;text-transform:uppercase}
+  .tile .d{font-size:64px;font-weight:800;line-height:1}
+  .tile .t{font-size:18px;font-weight:800;margin-top:6px;line-height:1.2}
+  .badge{position:absolute;left:10px;top:10px;background:#fff;border-radius:8px;padding:4px 9px;text-align:center;line-height:1.05;box-shadow:0 1px 6px rgba(0,0,0,.18)}
+  .badge .bm{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+  .badge .bd{font-size:22px;font-weight:800}
+  .soon{position:absolute;right:10px;top:10px;background:var(--accent);color:#fff;font-size:12px;font-weight:800;border-radius:10px;padding:2px 9px}
+  .body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:2px;flex:1}
+  .title{font-weight:800;font-size:17px;color:var(--accent);line-height:1.25}
+  .when{font-weight:600;font-size:15px}
+  .heb{font-family:var(--heb);color:var(--gold);font-size:15px}
+  .body .heb{align-self:flex-start}
+  .go{margin-top:auto;padding-top:8px;font-size:14px;font-weight:600;color:var(--accent)}
+  .foot{text-align:center;margin-top:18px}
+  .all{display:inline-block;border:2px solid var(--accent);color:var(--accent);border-radius:24px;padding:8px 22px;font-weight:800;text-decoration:none}
+  .all:hover{background:var(--accent);color:#fff}
+  .empty{text-align:center;color:var(--muted);padding:20px}
+  @media (max-width:560px){
+    .cards{grid-template-columns:1fr;gap:12px}
+    .card{flex-direction:row}
+    .pic{width:110px;flex:none}
+    .tile .d{font-size:36px}.tile .t{display:none}
+    .badge,.soon{display:none}
+    .body{padding:10px 12px}
+    .go{display:none}
+    h2{font-size:24px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+(() => {
+  'use strict';
+  const DAYS = 7;         // show everything in the coming week…
+  const MIN = 3;          // …but at least this many upcoming events
+  const MAX = 4;          // one row on a computer
+  const $app = document.getElementById('app');
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  let TZ = 'America/Chicago', DATA;
+
+  const fmt = (opts, d) => new Intl.DateTimeFormat('en-US', { timeZone: TZ, ...opts }).format(d);
+  const at = (e) => e.allDay ? new Date(e.date + 'T12:00:00Z') : new Date(e.start);
+  const fmtE = (e, opts) => fmt(e.allDay ? { ...opts, timeZone: 'UTC' } : opts, at(e));
+  const time = (iso) => fmt({ hour: 'numeric', minute: '2-digit' }, new Date(iso)).replace(':00', '').replace(' ', '').toLowerCase();
+  const todayStr = (now) => fmt({ year: 'numeric', month: '2-digit', day: '2-digit' }, now).replace(/(\d+)\/(\d+)\/(\d+)/, '$3-$1-$2');
+  const addDays = (s, n) => { const d = new Date(s + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+  const heb = (s) => (DATA.days[s] || {}).heb || '';
+
+  function upcoming(e, now) {
+    if (e.allDay) return (e.endDate || e.date) >= todayStr(now);
+    const end = e.end && e.end !== e.start ? new Date(e.end) : new Date(new Date(e.start).getTime() + 2 * 36e5);
+    return end > now;
+  }
+
+  function shabbosLine(today) {
+    // next Friday (or erev Yom Tov) with candle lighting, today included
+    for (let i = 0; i < 8; i++) {
+      const d = addDays(today, i), info = DATA.days[d];
+      if (info && info.candles) {
+        const next = DATA.days[addDays(d, 1)] || {};
+        const chag = (next.holidays || []).find(h => h.major);
+        const name = chag ? chag.en : 'Shabbat' + (next.parshaEn ? ' ' + next.parshaEn.replace(/^Parashat /, '') : '');
+        const hname = chag ? chag.he : (next.parsha ? 'פרשת ' + next.parsha : '');
+        const day = fmt({ weekday: 'long', timeZone: 'UTC' }, new Date(d + 'T12:00:00Z'));
+        return `<b>${esc(name)}</b> ${hname ? `<span class="heb" dir="rtl">${esc(hname)}</span>` : ''} · 🕯️ Candle lighting ${esc(day)} ${esc(time(info.candles))}${next.havdalah ? ` · Havdalah ${esc(time(next.havdalah))}` : ''}`;
+      }
+    }
+    return '';
+  }
+
+  function render() {
+    const now = new Date(), today = todayStr(now), until = addDays(today, DAYS - 1);
+    const all = DATA.events.filter(e => upcoming(e, now));
+    let evs = all.filter(e => e.date <= until);
+    if (evs.length < MIN) evs = all.slice(0, MIN);
+    const extra = Math.max(0, evs.length - MAX);
+    evs = evs.slice(0, MAX);
+    const page = (DATA.site && DATA.site.pageUrl) || '../';
+    const z = shabbosLine(today);
+
+    const cards = evs.map(e => {
+      const days = Math.round((new Date(e.date + 'T12:00:00Z') - new Date(today + 'T12:00:00Z')) / 864e5);
+      const soon = days <= 0 ? 'Today' : days === 1 ? 'Tomorrow' : '';
+      const pic = e.image ? (/^https?:/.test(e.image) ? e.image : '../' + e.image) : '';
+      const media = pic
+        ? `<img src="${esc(pic)}" alt="" loading="lazy">`
+        : `<div class="tile"><span class="m">${esc(fmtE(e, { month: 'short' }))}</span><span class="d">${esc(fmtE(e, { day: 'numeric' }))}</span><span class="t">${esc(e.title)}</span></div>`;
+      return `<a class="card" href="${esc(page + '#' + e.slug)}" target="_top">
+        <div class="pic">${media}${soon ? `<span class="soon">${soon}</span>` : ''}</div>
+        <div class="body">
+          <span class="title">${esc(e.title)}</span>
+          <span class="when">${esc(fmtE(e, { weekday: 'long', month: 'short', day: 'numeric' }))}${e.allDay ? '' : ' · ' + esc(time(e.start))}</span>
+          <span class="heb" dir="rtl">${esc(heb(e.date))}</span>
+          <span class="go">Details &amp; RSVP →</span>
+        </div></a>`;
+    }).join('');
+
+    $app.innerHTML = `
+      <h2>Upcoming at Chabad</h2>
+      ${z ? `<p class="shabbos">${z}</p>` : '<div style="height:14px"></div>'}
+      ${evs.length ? `<div class="cards">${cards}</div>` : '<p class="empty">New events coming soon!</p>'}
+      <div class="foot"><a class="all" href="${esc(page)}" target="_top">${extra ? `+ ${extra} more this week · ` : ''}Full calendar →</a></div>`;
+    document.querySelectorAll('img').forEach(i => i.addEventListener('load', postHeight));
+  }
+
+  function postHeight() {
+    if (window.parent === window) return;
+    window.parent.postMessage({ type: 'chabad-next-height', height: document.documentElement.scrollHeight }, '*');
+  }
+
+  fetch('../events.json?t=' + Date.now()).then(r => r.json()).then(d => {
+    DATA = d; TZ = d.timezone || TZ;
+    render(); postHeight();
+    if ('ResizeObserver' in window) new ResizeObserver(postHeight).observe(document.body);
+    setInterval(() => { render(); postHeight(); }, 10 * 60 * 1000);
+  }).catch(() => { $app.innerHTML = ''; postHeight(); });
+})();
+</script>
+</body>
+</html>

@@ -58,6 +58,10 @@ Replaces Tockify (paid). Rabbi Yehuda Horowitz's events calendar for jewishcarro
   </script>
   ```
   (No `<` or `&` in CMS scripts – hence `while(i--)`.)
+- Home-page strip `site/upcoming/` ("Upcoming at Chabad"): reads `../events.json` in the browser; this week's
+  Shabbat/Yom Tov line (parsha, candle lighting, havdalah) + cards for events in the next 7 days (at least 3, at most 4;
+  "+ N more this week" on the button). Cards link to `pageUrl#slug` (target _top) so the Holidays & Events page opens
+  that event. Same embed script as the next-event boxes (postMessage type `chabad-next-height`), src `<calendarUrl>upcoming/`.
 - Hidden from site: events marked **Private** in Google (feed shows "Busy") and slugs in `config.hide`
   (currently `challah-bake-dec-17` – a private bat mitzvah).
 
@@ -88,4 +92,4 @@ window.addEventListener('message',function(e){var d=e.data;if(d){if(d.type==='ch
 - Test locally: `CAL_ICS_FILE=test/sample.ics node scripts/build.mjs && python3 -m http.server -d site`
   (or fetch the real public feed). Screenshot with Playwright before pushing.
 - Commit as `chabad-calendar <chabad-calendar@users.noreply.github.com>`; after pushing, check the Actions run and the live site.
-- Don't commit `site/events.json`, `site/e/` or collection folders (built in CI; `.gitignore` covers `site/*/` except `site/img/`).
+- Don't commit `site/events.json`, `site/e/` or collection folders (built in CI; `.gitignore` covers `site/*/` except `site/img/`, `site/next/`, `site/upcoming/`).
