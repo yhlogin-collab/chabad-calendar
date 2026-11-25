@@ -112,7 +112,7 @@
         const name = chag ? chag.en : (next.parshaEn ? 'Shabbos ' + next.parshaEn.replace(/^Parashat /, '') : 'Shabbos');
         const hname = chag ? chag.he : (next.parsha ? `שבת פרשת ${next.parsha}` : 'שבת');
         let html = `<b>${esc(name)}</b> <span class="heb" dir="rtl">${esc(hname)}</span><span>🕯️ Candle lighting ${dayLabel(d).slice(0, 3)} ${timeLong(info.candles)}</span>`;
-        if (next.havdalah) html += `<span>Havdalah ${timeLong(next.havdalah)}</span>`;
+        if (next.havdalah) html += `<span>${chag ? 'Yom Tov' : 'Shabbat'} ends ${timeLong(next.havdalah)}</span>`;
         else if (next.candles && !chag) html += '';
         out.push({ kind: 'z', date: d, sort: d + 'T00:00', html });
       }
@@ -157,7 +157,9 @@
       const hol = (info.holidays || []).filter(h => !/^(Fast begins|Fast ends|Finish eating|Biur)/.test(h.en));
       const holHtml = hol.length ? `<span class="hol${hol[0].major ? ' major' : ''}" title="${esc(hol.map(h => h.en).join(', '))}">${esc(hol[0].en.replace(/ – light.*/, ''))}</span>`
         : info.parshaEn ? `<span class="hol">${esc(info.parshaEn.replace(/^Parashat /, ''))}</span>` : '';
-      const zm = info.candles ? `<span class="zm">🕯️ ${time(info.candles)}</span>` : info.havdalah ? `<span class="zm">✨ ${time(info.havdalah)}</span>` : '';
+      const endsLabel = (info.holidays || []).some(h => h.major) ? 'Yom Tov ends' : 'Shabbat ends';
+      const zm = info.candles ? `<span class="zm" title="Candle lighting ${time(info.candles)}">🕯️ ${time(info.candles)}</span>`
+        : info.havdalah ? `<span class="zm" title="${endsLabel} ${time(info.havdalah)}">✨ ${time(info.havdalah)}</span>` : '';
       const dots = evs.length ? `<span class="dots">${'<i></i>'.repeat(Math.min(evs.length, 3))}</span>` : '';
       html += `<div class="${cls}" data-date="${k}" ${evs.length ? `role="button" tabindex="0" aria-label="${esc(dayLabel(k))}: ${evs.length} event${evs.length > 1 ? 's' : ''}"` : ''}>
         <span class="num">${dt.getUTCDate()}</span><span class="hd">${esc(info.heb || '')}</span>${holHtml}${zm}${dots}</div>`;

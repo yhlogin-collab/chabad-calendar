@@ -24,7 +24,7 @@ Replaces Tockify (paid). Rabbi Yehuda Horowitz's events calendar for jewishcarro
 - `test/sample.ics` – sample feed for local testing.
 
 ## Features (current)
-- Month grid like Tockify (site orange #f04a26): Hebrew date per day, holiday/parsha, Friday 🕯️ candle time, ✨ havdalah, event dots.
+- Month grid like Tockify (site orange #f04a26): Hebrew date per day, holiday/parsha, Friday 🕯️ candle time, ✨ Shabbat/Yom Tov ends (labelled "Shabbat ends", never "Havdalah"), event dots.
   Click a day → list filtered to that day. Month / List / Today buttons. Mobile layout.
 - Event list: series picture or orange date tile (with Hebrew date), title, time, Hebrew date, 2-line description.
   Shabbos/Chanukah strips between events are OFF (`SHOW_ZMAN_ROWS = false` in app.js) — user preference; zmanim stay in the grid.
@@ -59,7 +59,7 @@ Replaces Tockify (paid). Rabbi Yehuda Horowitz's events calendar for jewishcarro
   ```
   (No `<` or `&` in CMS scripts – hence `while(i--)`.)
 - Home-page strip `site/upcoming/` ("Upcoming at Chabad"): reads `../events.json` in the browser; this week's
-  Shabbat/Yom Tov line (parsha, candle lighting, havdalah) + cards for events in the next 7 days (at least 3, at most 4;
+  Shabbat/Yom Tov line (parsha, candle lighting, "Shabbat ends") + cards for events in the next 7 days (at least 3, at most 4;
   "+ N more this week" on the button). Cards link to `pageUrl#slug` (target _top) so the Holidays & Events page opens
   that event. Same embed script as the next-event boxes (postMessage type `chabad-next-height`), src `<calendarUrl>upcoming/`.
 - `site/embed.js` – loaded site-wide from ChabadOne's **footer code** (the home page has no HTML editing):

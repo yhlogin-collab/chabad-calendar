@@ -88,7 +88,7 @@
         const name = chag ? chag.en : 'Shabbat' + (next.parshaEn ? ' ' + next.parshaEn.replace(/^Parashat /, '') : '');
         const hname = chag ? chag.he : (next.parsha ? 'פרשת ' + next.parsha : '');
         const day = fmt({ weekday: 'long', timeZone: 'UTC' }, new Date(d + 'T12:00:00Z'));
-        return `<b>${esc(name)}</b> ${hname ? `<span class="heb" dir="rtl">${esc(hname)}</span>` : ''} · 🕯️ Candle lighting ${esc(day)} ${esc(time(info.candles))}${next.havdalah ? ` · Havdalah ${esc(time(next.havdalah))}` : ''}`;
+        return `<b>${esc(name)}</b> ${hname ? `<span class="heb" dir="rtl">${esc(hname)}</span>` : ''} · 🕯️ Candle lighting ${esc(day)} ${esc(time(info.candles))}${next.havdalah ? ` · ${chag ? 'Yom Tov' : 'Shabbat'} ends ${esc(time(next.havdalah))}` : ''}`;
       }
     }
     return '';
