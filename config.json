@@ -4,9 +4,9 @@
   "daysBack": 62,
   "daysAhead": 400,
   "location": {
-    "name": "Lewisville, TX",
-    "latitude": 33.0462,
-    "longitude": -96.9942,
+    "name": "The Colony, TX 75056",
+    "latitude": 33.07,
+    "longitude": -96.89,
     "elevation": 0
   },
   "candleLightingMins": 18,
