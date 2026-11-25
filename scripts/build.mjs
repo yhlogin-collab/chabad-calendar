@@ -215,7 +215,7 @@ function jewishCalendar(from, to) {
   const evs = HebrewCalendar.calendar({
     start, end, location: loc, candlelighting: true, sedrot: true, il: false,
     candleLightingMins: config.candleLightingMins, havdalahMins: config.havdalahMins || undefined,
-    havdalahDeg: config.havdalahMins ? undefined : 8.5, noModern: false, locale: 'en',
+    havdalahDeg: config.havdalahMins ? undefined : (config.havdalahDeg || 8.5), noModern: false, locale: 'en',
   });
   const days = {};
   const day = (d) => (days[d] ||= { heb: '', holidays: [], candles: null, havdalah: null, parsha: null });

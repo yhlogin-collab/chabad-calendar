@@ -4,9 +4,9 @@
   "daysBack": 62,
   "daysAhead": 400,
   "location": {
-    "name": "The Colony, TX 75056",
-    "latitude": 33.07,
-    "longitude": -96.89,
+    "name": "Carrollton-Lewisville (75056)",
+    "latitude": 33.08,
+    "longitude": -97.01,
     "elevation": 0
   },
   "candleLightingMins": 18,
@@ -110,5 +110,6 @@
         "Chanukah Menorah"
       ]
     }
-  }
+  },
+  "havdalahDeg": 8.4
 }

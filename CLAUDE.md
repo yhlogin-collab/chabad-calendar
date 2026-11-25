@@ -15,7 +15,7 @@ Replaces Tockify (paid). Rabbi Yehuda Horowitz's events calendar for jewishcarro
   (ChabadOne CMS). **The CMS parses article HTML as XML: never put a bare `&` (or `&&`) in embed code.**
 
 ## Files
-- `config.json` – calendar ID, timezone, location for zmanim (33.07,-96.89 in zip 75056, 18-min candles, Shabbat ends at 8.5° – tuned to match Chabad.org's 75056 times: Nov 27/28 and Dec 4/5 2026 = 5:03/6:00 and 5:02/6:00),
+- `config.json` – calendar ID, timezone, location for zmanim (33.08,-97.01, 18-min candles, Shabbat ends at `havdalahDeg` 8.4° – fitted to Chabad.org zip 75056: matches all 43 times checked, Nov 27 2026 – erev Pesach Apr 21 2027 incl. DST; Hebcal at 8.5° was 1 min late on Shabbat ends),
   `site` (pageUrl, calendarUrl, shareIntro, email), `images` (series → picture), `links` (series → page on the site), `series` (key → name + title prefixes, for next-event boxes), `collections`, `hide` (event slugs to leave off).
 - `scripts/build.mjs` – parses iCal with ical.js (recurrences, exceptions, EXDATE, all-day), times as wall-clock in
   America/Chicago; Hebrew dates/holidays/parsha/candles/havdalah via @hebcal/core; readable slugs; share pages with OG tags.
