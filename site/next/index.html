@@ -141,7 +141,7 @@
       ${e.flyer ? `<div class="flyer"><img src="${esc(e.flyer.replace(/sz=w\d+/, 'sz=w1200'))}" alt="${esc(e.title)} flyer" onerror="this.parentNode.remove()"></div>` : ''}
       ${evs.length > 1 ? `<div class="upcoming"><h4>Coming up</h4><ul>${evs.slice(1, 1 + LIST).map(x => `
         <li><span class="d"><b>${esc(fmtTZ(x, { weekday: 'short', month: 'short', day: 'numeric' }))}</b><span class="heb" dir="rtl">${esc(heb(x))}</span>
-          ${!x.allDay || x.title.includes(' - ') ? `<span class="t">${esc([timeRange(x), x.title.includes(' - ') ? x.title.replace(/^.*? - /, '') : ''].filter(Boolean).join(' · '))}</span>` : ''}</span>
+          ${!x.allDay || x.title.includes(' - ') ? `<span class="t">${esc([timeRange(x), x.title.includes(' - ') ? x.title : ''].filter(Boolean).join(' · '))}</span>` : ''}</span>
           <a href="${esc(google(x))}" target="_blank" rel="noopener">+ Calendar</a></li>`).join('')}</ul></div>` : ''}`;
     const b = document.getElementById('ics'); if (b) b.onclick = () => ics(e);
     document.querySelectorAll('img').forEach(i => i.addEventListener('load', postHeight));
