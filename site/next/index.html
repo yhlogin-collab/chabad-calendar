@@ -149,7 +149,7 @@
 
   function postHeight() {
     if (window.parent === window) return;
-    window.parent.postMessage({ type: 'chabad-next-height', series: key, height: document.documentElement.scrollHeight }, '*');
+    window.parent.postMessage({ type: 'chabad-next-height', series: key, height: Math.ceil($app.getBoundingClientRect().bottom + window.scrollY) + 6 }, '*');
   }
 
   fetch('../events.json?t=' + Date.now()).then(r => r.json()).then(d => {

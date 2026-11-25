@@ -332,7 +332,8 @@
   // Tell the parent page our height (used by the optional auto-resize snippet).
   function postHeight() {
     if (window.parent === window) return;
-    const h = $('#modal').hidden ? document.documentElement.scrollHeight : Math.max(document.documentElement.scrollHeight, $('.sheet').offsetHeight + 60);
+    const content = Math.ceil($('#cal').getBoundingClientRect().bottom + window.scrollY);
+    const h = $('#modal').hidden ? content : Math.max(content, $('.sheet').getBoundingClientRect().bottom + window.scrollY + 30);
     window.parent.postMessage({ type: 'chabad-calendar-height', height: h }, '*');
   }
 
