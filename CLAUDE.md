@@ -10,7 +10,8 @@ Replaces Tockify (paid). Rabbi Yehuda Horowitz's events calendar for jewishcarro
 - `.github/workflows/deploy.yml` runs every 6 hours (cron `17 */6 * * *`), on push, and on "Run workflow".
   It runs `scripts/build.mjs` → `site/events.json` + `site/e/<slug>/` share pages, then deploys `site/` to GitHub Pages.
   The deploy step waits 15s and retries once, because GitHub's artifact lookup sometimes fails transiently.
-- Live: https://yhlogin-collab.github.io/chabad-calendar/ (Pages source = GitHub Actions).
+- Live: https://events.jewishcarrollton.org/ (custom domain; CNAME events → yhlogin-collab.github.io added by ChabadOne support 2026-11-25; Pages source = GitHub Actions).
+  Old yhlogin-collab.github.io/chabad-calendar/ URLs 301-redirect here – to http until "Enforce HTTPS" is on, which the https site blocks, so all embeds must use https://events.jewishcarrollton.org/.
 - Embedded on https://www.jewishcarrollton.org/templates/articlecco_cdo/aid/7009553/jewish/Holidays-Events.htm
   (ChabadOne CMS). **The CMS parses article HTML as XML: never put a bare `&` (or `&&`) in embed code.**
 
@@ -52,7 +53,7 @@ Replaces Tockify (paid). Rabbi Yehuda Horowitz's events calendar for jewishcarro
   community-menorah. Each event carries `series` in events.json. Auto-height via postMessage type `chabad-next-height`.
   Embed (XML-safe, identical script on every page, only `s=` changes):
   ```html
-  <iframe src="https://yhlogin-collab.github.io/chabad-calendar/next/?s=minyan" style="width:100%;height:560px;border:0" scrolling="no" title="Next event"></iframe>
+  <iframe src="https://events.jewishcarrollton.org/next/?s=minyan" style="width:100%;height:560px;border:0" scrolling="no" title="Next event"></iframe>
   <script>
   window.addEventListener('message',function(e){var d=e.data;if(d){if(d.type==='chabad-next-height'){var fs=document.getElementsByTagName('iframe');var i=fs.length;while(i--){if(fs[i].contentWindow===e.source){fs[i].style.height=(d.height+10)+'px';}}}}});
   </script>
@@ -63,7 +64,7 @@ Replaces Tockify (paid). Rabbi Yehuda Horowitz's events calendar for jewishcarro
   "+ N more this week" on the button). Cards link to `pageUrl#slug` (target _top) so the Holidays & Events page opens
   that event. Same embed script as the next-event boxes (postMessage type `chabad-next-height`), src `<calendarUrl>upcoming/`.
 - `site/embed.js` – loaded site-wide from ChabadOne's **footer code** (the home page has no HTML editing):
-  `<script src="https://yhlogin-collab.github.io/chabad-calendar/embed.js" async="async"></script>`.
+  `<script src="https://events.jewishcarrollton.org/embed.js" async="async"></script>`.
   On the home page (`body.home`) it inserts `#chabad-upcoming` (white section, iframe of `upcoming/`) right after the
   `.promo_slider` row, before the gray "About" `.hp-row`; fallbacks: before first `.hp-row`, else top of `#content`.
   On every page it handles `chabad-next-height` auto-sizing, so next-event boxes only need the `<iframe>` line.
@@ -81,7 +82,7 @@ tefillin bags, cups, Torah covers). Only Jewish symbols.
 
 ## Current embed code (XML-safe)
 ```html
-<iframe id="chabadCal" src="https://yhlogin-collab.github.io/chabad-calendar/" style="width:100%;height:2750px;border:0" scrolling="no" title="Holidays and Events" allow="clipboard-write; web-share"></iframe>
+<iframe id="chabadCal" src="https://events.jewishcarrollton.org/" style="width:100%;height:2750px;border:0" scrolling="no" title="Holidays and Events" allow="clipboard-write; web-share"></iframe>
 <script>
 (function(){var f=document.getElementById('chabadCal');var h=window.location.hash;if(h){f.src=f.src.split('#')[0]+h;}
 window.addEventListener('message',function(e){var d=e.data;if(d){if(d.type==='chabad-calendar-height'){f.style.height=(d.height+20)+'px';}}});})();
@@ -89,9 +90,7 @@ window.addEventListener('message',function(e){var d=e.data;if(d){if(d.type==='ch
 ```
 
 ## Pending
-- Custom domain `events.jewishcarrollton.org`: user emailed/will email ChabadOne support (they manage DNS) for
-  `CNAME events → yhlogin-collab.github.io`. When live: set the Pages custom domain, change `site.calendarUrl`
-  to `https://events.jewishcarrollton.org/`, give the user the embed line with the new src, verify HTTPS.
+- Tick "Enforce HTTPS" in Settings → Pages once GitHub allows it (certificate was issued 2026-11-25).
 - Cancel Tockify once the user confirms the site looks right.
 
 ## Working rules

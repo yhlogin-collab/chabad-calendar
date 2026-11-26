@@ -1,6 +1,6 @@
 /* Chabad of Carrollton-Lewisville – calendar helper for jewishcarrollton.org
  * Loaded once from the ChabadOne footer code:
- *   <script src="https://yhlogin-collab.github.io/chabad-calendar/embed.js" async="async"></script>
+ *   <script src="https://events.jewishcarrollton.org/embed.js" async="async"></script>
  * 1) Home page: inserts the "Upcoming at Chabad" strip right under the banner slider.
  * 2) Every page: lets the calendar boxes (next-event boxes, home strip) size themselves to fit.
  */
@@ -9,7 +9,7 @@
   if (window.__chabadCalEmbed) return;
   window.__chabadCalEmbed = true;
 
-  var BASE = 'https://yhlogin-collab.github.io/chabad-calendar/';
+  var BASE = 'https://events.jewishcarrollton.org/';
 
   // ---- auto-height for our boxes -------------------------------------------
   window.addEventListener('message', function (e) {
